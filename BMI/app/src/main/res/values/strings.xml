@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">BMI</string>
+    <string name="content_main_title">Chương trình tính chỉ số BMI</string>
+    <string name="input_name">Nhập tên:</string>
+</resources>

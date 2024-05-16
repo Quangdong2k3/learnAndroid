@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">TH2</string>
+    <string name="calculator_text">Calculator</string>
+    <string name="input_a">Nhập a\n</string>
+    <string name="input_kq">Kết quả\n</string>
+    <string name="input_b">Nhập b</string>
+    <string name="txt_tong">Tổng</string>
+    <string name="txt_hieu">Hiệu</string>
+    <string name="txt_tich">Tích</string>
+    <string name="txt_thuong">Thương</string>
+</resources>
