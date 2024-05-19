@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".ListView_Calendar">
+
+    <TextView
+        android:padding="10dp"
+        android:background="#4CAF50"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="30sp"
+        android:textColor="#FF0707"
+        android:text="Calendar Notes"
+        android:textAlignment="center" />
+
+    <TextView
+        android:id="@+id/txt_date"
+        android:padding="9dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Adasdsadasd" android:background="#FFEB3B"
+        android:textAlignment="center" />
+
+    <EditText
+        android:id="@+id/txt_work"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter the work here"
+        android:inputType="text"
+        tools:ignore="Autofill,LabelFor" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hour"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/txt_hour"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:inputType="text"
+            tools:ignore="Autofill,LabelFor" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Minute"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/txt_minute"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:inputType="text"
+            tools:ignore="Autofill,LabelFor" />
+    </LinearLayout>
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" android:id="@+id/btn_add_work"
+        android:text="Add Work"/>
+
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" android:id="@+id/lst_view_work"/>
+
+</LinearLayout>
