@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".CalculateFragment">
+
+    <!-- TODO: Update blank fragment layout -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        tools:ignore="UselessParent">
+
+        <EditText
+            android:id="@+id/input_A"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Nhâp A"
+            android:inputType="number"
+            tools:ignore="Autofill" />
+
+        <EditText
+            android:layout_marginTop="20dp"
+
+            android:id="@+id/input_B"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Nhâp B"
+            android:inputType="number"
+            tools:ignore="Autofill" />
+<Button
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content" android:text="+" android:layout_gravity="center" android:id="@+id/btn_cong"/>
+    </LinearLayout>
+</LinearLayout>

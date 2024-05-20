@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+
+    <TabHost
+
+        android:id="@+id/tabHost"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        app:tabIndicatorColor="#A82B2B"
+        app:tabIndicatorFullWidth="true"
+        tools:ignore="UselessLeaf">
+
+        <TabWidget
+            android:id="@android:id/tabs"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            tools:ignore="ObsoleteLayoutParam" />
+
+        <FrameLayout
+
+            android:layout_marginTop="80dp"
+            android:layout_gravity="bottom"
+            android:id="@android:id/tabcontent"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:ignore="ObsoleteLayoutParam">
+
+
+                <include  android:id="@+id/tab_1" layout="@layout/fragment_calculate" />
+
+
+
+                <include android:id="@+id/tab_2" layout="@layout/fragment_history" />
+        </FrameLayout>
+
+    </TabHost>
+</LinearLayout>
