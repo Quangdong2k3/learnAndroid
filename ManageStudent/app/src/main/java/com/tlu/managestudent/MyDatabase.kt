@@ -11,9 +11,9 @@ import androidx.annotation.RequiresApi
 
 @RequiresApi(Build.VERSION_CODES.P)
 class MyDatabase(
-    context: Context?, factory: SQLiteDatabase.CursorFactory?,
-    name: String?,
-    version: Int
+    context: Context?,
+    factory: SQLiteDatabase.CursorFactory?
+
 
 ) : SQLiteOpenHelper(context, DATABASE_NAME, factory, DATABASE_VERSION) {
 
@@ -68,10 +68,42 @@ class MyDatabase(
                 )
             } while (cursor.moveToNext())
         }
-
+        db.close()
         return list
     }
 
+    fun deleteLopHoc(id: String): Int {
+        var isFlag = 0
+
+
+        val db = this.writableDatabase
+        try {
+            isFlag = db.delete(TABLE_NAME, "$ID_COL=?", arrayOf(id))
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        db.close()
+        return isFlag
+    }
+    fun editLopHoc(c:LopHoc): Int {
+        var isFlag = 0
+
+
+        val db = this.writableDatabase
+        try {
+            val contentValues = ContentValues()
+            contentValues.put(ID_COL, c.maLop)
+            contentValues.put(NAME_COl, c.tenLop)
+            contentValues.put(SISO_COL, c.numberStudent)
+            isFlag = db.update(TABLE_NAME,contentValues, "$ID_COL=?", arrayOf(c.maLop))
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        db.close()
+        return isFlag
+    }
 
     companion object {
         // here we have defined variables for our database
