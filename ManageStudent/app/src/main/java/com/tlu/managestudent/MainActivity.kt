@@ -1,7 +1,11 @@
 package com.tlu.managestudent
 
+import android.R.*
 import android.os.Build
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
+import android.util.Log
 import android.view.View
 import android.view.View.OnClickListener
 import android.widget.ArrayAdapter
@@ -14,6 +18,7 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.widget.addTextChangedListener
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {
 
@@ -26,8 +31,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     private lateinit var btnSelect: Button
     private lateinit var listView: ListView
     private var db: MyDatabase? = null
-    private lateinit var adapter: ArrayAdapter<LopHoc>
-    private lateinit var list_get_all_data: ArrayList<LopHoc>
+    private lateinit var adapter: ArrayAdapter<String>
+    private lateinit var list_get_all_data: ArrayList<String>
 
     @RequiresApi(Build.VERSION_CODES.P)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,7 +44,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        init()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            init()
+        }
 
 
     }
@@ -58,26 +65,79 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         btnSelect = findViewById(R.id.btn_select)
 
         btnUpdate = findViewById(R.id.btn_update)
-
+        list_get_all_data = arrayListOf()
         listView = findViewById(R.id.lst_view_data)
         db = MyDatabase(this, null)
-        adapter = ArrayAdapter<LopHoc>(this, android.R.layout.simple_list_item_1, list_get_all_data)
-        geAll()
+        adapter =
+            ArrayAdapter<String>(applicationContext, layout.simple_list_item_1, list_get_all_data)
+
+        adapter.notifyDataSetChanged()
+        getAll()
 
 
         btnAdd.setOnClickListener(this)
         btnDelete.setOnClickListener(this)
         btnUpdate.setOnClickListener(this)
         btnSelect.setOnClickListener(this)
+
+
+        listView.setOnItemClickListener { parent, view, position, id ->
+
+            val s1 = list_get_all_data[position].split("-")[0].trim()
+            val s2 = list_get_all_data[position].split("-")[1].trim()
+            val s3 = list_get_all_data[position].split("-")[2].trim()
+
+
+            resetText(s1, s2, s3)
+
+
+            Log.e("eaaaa", s1.toString())
+        }
+
+        this.id.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+
+                try {
+                    list_get_all_data.clear()
+                    for (c in db?.getDataWithID(s.toString())!!) {
+                        list_get_all_data.add("${c.maLop} - ${c.tenLop} - ${c.numberStudent}")
+                    }
+                    adapter.notifyDataSetChanged()
+                    listView.adapter = adapter
+                    Log.e("meeee", list_get_all_data.size.toString())
+
+                } catch (e: Exception) {
+                    Toast.makeText(applicationContext, e.message, Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+
+            }
+
+        })
+    }
+
+    private fun resetText(s1: String, s2: String, s3: String) {
+        this.id.setText(s1)
+        this.name.setText(s2)
+        this.siso.setText(s3)
     }
 
     @RequiresApi(Build.VERSION_CODES.P)
-    private fun geAll() {
+    private fun getAll() {
         try {
-            list_get_all_data = db?.getAllData()!!
-
+            list_get_all_data.clear()
+            for (c in db?.getAllData()!!) {
+                list_get_all_data.add("${c.maLop} - ${c.tenLop} - ${c.numberStudent}")
+            }
             adapter.notifyDataSetChanged()
             listView.adapter = adapter
+            Log.e("meeee", list_get_all_data.size.toString())
 
         } catch (e: Exception) {
             Toast.makeText(this, e.message, Toast.LENGTH_SHORT).show()
@@ -88,18 +148,18 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     override fun onClick(v: View?) {
         when (v?.id) {
             R.id.btn_insert -> {
-                try {
-                    val c: LopHoc =
-                        LopHoc(
-                            id.text.toString(),
-                            name.text.toString(),
-                            siso.text.toString().toInt()
-                        )
+                val c: LopHoc =
+                    LopHoc(
+                        id.text.toString(),
+                        name.text.toString(),
+                        siso.text.toString().toInt()
+                    )
 
-                    db?.insertData(c)
-                } catch (e: Exception) {
-                    Toast.makeText(this, e.message, Toast.LENGTH_SHORT).show()
-                }
+                db?.insertData(c)
+
+                getAll()
+                resetText("", "", "")
+
             }
 
             R.id.btn_update -> {
@@ -114,6 +174,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                     db?.editLopHoc(c)
                 } catch (e: Exception) {
                     Toast.makeText(this, e.message, Toast.LENGTH_SHORT).show()
+                } finally {
+                    resetText("", "", "")
+                    getAll()
                 }
             }
 
@@ -129,12 +192,15 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                     db?.deleteLopHoc(c.maLop)
                 } catch (e: Exception) {
                     Toast.makeText(this, e.message, Toast.LENGTH_SHORT).show()
+                } finally {
+                    resetText("", "", "")
+                    getAll()
                 }
             }
 
             R.id.btn_select -> {
-                geAll()
-
+                getAll()
+                resetText("", "", "")
             }
         }
     }

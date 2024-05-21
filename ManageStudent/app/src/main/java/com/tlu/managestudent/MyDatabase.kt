@@ -7,6 +7,8 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.os.Build
+import android.util.Log
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 
 @RequiresApi(Build.VERSION_CODES.P)
@@ -35,11 +37,15 @@ class MyDatabase(
         contentValues.put(ID_COL, c.maLop)
         contentValues.put(NAME_COl, c.tenLop)
         contentValues.put(SISO_COL, c.numberStudent)
-
-
         val db = this.writableDatabase
 
-        db.insert(TABLE_NAME, null, contentValues)
+        try {
+
+            db.insert(TABLE_NAME, null, contentValues)
+        } catch (e: Exception) {
+            Toast.makeText(null,e.message,Toast.LENGTH_SHORT).show()
+        }
+
 
 
         db.close()
@@ -66,6 +72,7 @@ class MyDatabase(
                         cursor.getString(cursor.getColumnIndex(SISO_COL)).toInt()
                     )
                 )
+                Log.e("e", cursor.getString(cursor.getColumnIndex(ID_COL)).toString())
             } while (cursor.moveToNext())
         }
         db.close()
@@ -86,7 +93,8 @@ class MyDatabase(
         db.close()
         return isFlag
     }
-    fun editLopHoc(c:LopHoc): Int {
+
+    fun editLopHoc(c: LopHoc): Int {
         var isFlag = 0
 
 
@@ -96,13 +104,49 @@ class MyDatabase(
             contentValues.put(ID_COL, c.maLop)
             contentValues.put(NAME_COl, c.tenLop)
             contentValues.put(SISO_COL, c.numberStudent)
-            isFlag = db.update(TABLE_NAME,contentValues, "$ID_COL=?", arrayOf(c.maLop))
+            isFlag = db.update(TABLE_NAME, contentValues, "$ID_COL=?", arrayOf(c.maLop))
 
         } catch (e: Exception) {
             e.printStackTrace()
         }
         db.close()
         return isFlag
+    }
+
+    @SuppressLint("Range", "Recycle")
+     fun getDataWithID(id: String): ArrayList<LopHoc> {
+        val db = this.readableDatabase
+        val list: ArrayList<LopHoc> = arrayListOf()
+        val cursor = db.query(
+            true,
+            TABLE_NAME,
+            null,
+            "$ID_COL LIKE ?",
+            arrayOf("%$id%"),
+            null,
+            null,
+            null,
+            null
+        )
+
+        if (cursor.moveToFirst()) {
+            do {
+                list.add(
+                    LopHoc(
+                        cursor.getString(cursor.getColumnIndex(ID_COL)).toString(),
+                        cursor.getString(
+                            cursor.getColumnIndex(
+                                NAME_COl
+                            )
+                        ),
+                        cursor.getString(cursor.getColumnIndex(SISO_COL)).toInt()
+                    )
+                )
+                Log.e("e", cursor.getString(cursor.getColumnIndex(ID_COL)).toString())
+            } while (cursor.moveToNext())
+        }
+        db.close()
+        return list
     }
 
     companion object {
