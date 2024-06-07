@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "870525023056",
+    "project_id": "ktraandroid",
+    "storage_bucket": "ktraandroid.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:870525023056:android:6034789b6188e609667255",
+        "android_client_info": {
+          "package_name": "com.tlu.ktraandroid"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAE2GntNiXWfDjmIr77txanmYfCcAfIKXo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

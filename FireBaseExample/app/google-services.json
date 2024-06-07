@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "721466963419",
+    "firebase_url": "https://fir-example-439ec-default-rtdb.firebaseio.com",
+    "project_id": "fir-example-439ec",
+    "storage_bucket": "fir-example-439ec.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:721466963419:android:12630a99ec0173e816e3fe",
+        "android_client_info": {
+          "package_name": "com.tlu.firebaseexample"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAqd_MriPB3qO6PTpXAZkiDiFlvIrmp-CE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
