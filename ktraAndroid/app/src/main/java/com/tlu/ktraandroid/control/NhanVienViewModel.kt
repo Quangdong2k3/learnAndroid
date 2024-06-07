@@ -10,6 +10,7 @@ import com.google.firebase.database.ValueEventListener
 import com.tlu.ktraandroid.helper.FireBaseDataHelper
 import com.tlu.ktraandroid.model.DonVi
 import com.tlu.ktraandroid.model.NhanVien
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -117,7 +118,7 @@ class NhanVienViewModel : ViewModel() {
     }
 
     //Action
-    fun addOrUpdateNV(idnv: String?, callBack:  (String) -> Unit) {
+    fun addOrUpdateNV(idnv: String?, callBack: (String) -> Unit) {
         viewModelScope.launch {
             val key = idnv ?: nvRef.push().key.toString()
             val nhanvien = NhanVien(
@@ -137,7 +138,7 @@ class NhanVienViewModel : ViewModel() {
                     if (it.isSuccessful) {
                         callBack("Add nhân viên thành công")
 
-                        db.getDonVi(_donVi.value.maDonVi) { donVi: DonVi?, s: String? ->
+                        db.getDonVi(nhanvien.maDonVi.maDonVi) { donVi: DonVi?, s: String? ->
                             if (donVi == null) {
                                 callBack("Không tìm thấy đơn vị ")
                                 return@getDonVi
@@ -194,6 +195,44 @@ class NhanVienViewModel : ViewModel() {
                     TODO("Not yet implemented")
                 }
             })
+        }
+    }
+
+    fun setDSNhanVien(l: List<NhanVien>) {
+        _dsNhanVien.value = l
+    }
+
+    fun searchNV(s: String) {
+        if (!s.equals("")) {
+            nvRef.orderByChild("ten").startAt(s).endAt("${s}\uf8ff")
+
+                .addValueEventListener(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        val list = mutableListOf<NhanVien>()
+                        for (document in snapshot.children) {
+                            val dv = document.getValue(NhanVien::class.java)
+                            if (dv?.ten!!.lowercase().contains(s.lowercase())) {
+                                list.add(dv!!)
+
+                            }
+
+                        }
+                        setDSNhanVien(list)
+
+
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        TODO()
+                        setDSNhanVien(emptyList())
+                    }
+                })
+        } else {
+            getAllNV {
+                setDSNhanVien(it)
+
+
+            }
         }
     }
 

@@ -37,6 +37,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DismissDirection
 import androidx.compose.material3.DismissValue
 import androidx.compose.material3.Divider
@@ -81,8 +82,10 @@ import com.tlu.ktraandroid.model.DonVi
 import com.tlu.ktraandroid.model.NhanVien
 import com.tlu.ktraandroid.model.listChucVus
 import com.tlu.ktraandroid.ui.theme.KtraAndroidTheme
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+@SuppressLint("CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun NVScreen(navController: NavHostController, nhanVienViewModel: NhanVienViewModel) {
@@ -94,6 +97,7 @@ fun NVScreen(navController: NavHostController, nhanVienViewModel: NhanVienViewMo
         val searchtxt = remember {
             mutableStateOf("")
         }
+        var isLoading by remember { mutableStateOf(false) }
 
         val sheetState = rememberModalBottomSheetState()
         val scope = rememberCoroutineScope()
@@ -101,11 +105,19 @@ fun NVScreen(navController: NavHostController, nhanVienViewModel: NhanVienViewMo
         val focuesManager = LocalFocusManager.current
 
         val dsNV = nhanVienViewModel.dsNhanVien.collectAsState()
+        LaunchedEffect(Unit) {
+            delay(4000) // Delay for 2 seconds
+            isLoading = false
+        }
         ConstraintLayout {
             Column(modifier = Modifier.fillMaxSize()) {
 
                 TextField(value = searchtxt.value,
-                    onValueChange = { searchtxt.value = it },
+                    onValueChange = {
+                        searchtxt.value = it
+
+
+                    },
                     placeholder = {
                         Text(
                             text = "Tìm kiếm tên nhân viên"
@@ -115,7 +127,13 @@ fun NVScreen(navController: NavHostController, nhanVienViewModel: NhanVienViewMo
                     ), keyboardActions = KeyboardActions(
                         onSearch = {
 
-
+                            scope.launch {
+                                isLoading = true
+                                delay(3000)
+                                nhanVienViewModel
+                                    .searchNV(searchtxt.value)
+                                isLoading = false
+                            }
                             focuesManager.clearFocus()
                         }
                     ),
@@ -131,93 +149,105 @@ fun NVScreen(navController: NavHostController, nhanVienViewModel: NhanVienViewMo
 
                 Column(modifier = Modifier.padding(10.dp)) {
                     Log.d("Xóa nhan vien: ", dsNV.value.size.toString())
+                    if (isLoading) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(0.9f)
+                        }
+                    } else {
+                        if (dsNV.value.isNotEmpty()) {
 
-                    if (dsNV.value.isNotEmpty()) {
-                        LazyColumn {
+                            LazyColumn {
 
 //                            val grouped = list.groupBy { it.ten[0] }
-//                            dsNV.value.filter { it.ten.isNotEmpty() } // Lọc các phần tử có trường 'ten' không rỗng
-//                                .groupBy { it.ten[0] }
-//                                .forEach { (header, u) ->
-//                                    stickyHeader(key = "header_$header") {
-//                                        Text(
-//                                            text = header.toString(),
-//                                            modifier = Modifier
-//                                                .fillMaxWidth()
-//                                                .padding(10.dp)
-//                                                .background(Color.Gray)
-//                                        )
-//                                    }
-                                    itemsIndexed(
+                                dsNV.value.filter { it.ten.isNotEmpty() } // Lọc các phần tử có trường 'ten' không rỗng
+                                    .groupBy { it.ten[0] }
+                                    .forEach { (header, u) ->
+                                        stickyHeader(key = "header_$header") {
+                                            Text(
+                                                text = header.toString(),
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(10.dp)
+                                                    .background(Color.Gray)
+                                            )
+                                        }
+                                        itemsIndexed(
 //                                        u
-                                        dsNV.value
-                                    )
-                                    { index, item ->
-                                        val coroutineScope = rememberCoroutineScope()
-                                        val state = rememberDismissState(
+                                            u
+                                        )
+                                        { index, item ->
+                                            val coroutineScope = rememberCoroutineScope()
+                                            val state = rememberDismissState(
 
-                                            initialValue = DismissValue.Default,
-                                            positionalThreshold = { totalDistance: Float -> totalDistance / 3 })
+                                                initialValue = DismissValue.Default,
+                                                positionalThreshold = { totalDistance: Float -> totalDistance / 3 })
 
-                                        SwipeToDismiss(
-                                            state = state,
-                                            modifier = Modifier.animateItemPlacement(tween(200)),
-                                            background = {
-                                                val color = when (state.dismissDirection) {
-                                                    DismissDirection.EndToStart -> Color.Red
-                                                    DismissDirection.StartToEnd -> Color.Transparent
-                                                    null -> Color.Transparent
-                                                }
-                                                Box(
-                                                    modifier = Modifier
-                                                        .background(color)
-                                                        .fillMaxSize()
+                                            SwipeToDismiss(
+                                                state = state,
+                                                modifier = Modifier.animateItemPlacement(tween(200)),
+                                                background = {
+                                                    val color = when (state.dismissDirection) {
+                                                        DismissDirection.EndToStart -> Color.Red
+                                                        DismissDirection.StartToEnd -> Color.Transparent
+                                                        null -> Color.Transparent
+                                                    }
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .background(color)
+                                                            .fillMaxSize()
 
-                                                        .padding(8.dp),
-                                                    contentAlignment = Alignment.CenterEnd
-                                                ) {
-                                                    Row() {
-                                                        Icon(
-                                                            Icons.Default.Delete,
-                                                            contentDescription = null,
-                                                            tint = Color.White,
-                                                            modifier = Modifier
+                                                            .padding(8.dp),
+                                                        contentAlignment = Alignment.CenterEnd
+                                                    ) {
+                                                        Row() {
+                                                            Icon(
+                                                                Icons.Default.Delete,
+                                                                contentDescription = null,
+                                                                tint = Color.White,
+                                                                modifier = Modifier
 
-                                                                .clickable {
-                                                                    nhanVienViewModel.deleteNV(item) {
-                                                                        Log.d(
-                                                                            "Xóa nhan vien: ",
-                                                                            item.toString()
-                                                                        )
-                                                                    }
-                                                                })
+                                                                    .clickable {
+                                                                        nhanVienViewModel.deleteNV(
+                                                                            item
+                                                                        ) {
+                                                                            Log.d(
+                                                                                "Xóa nhan vien: ",
+                                                                                item.toString()
+                                                                            )
+                                                                        }
+                                                                    })
 //                                    if (state.targetValue == DismissValue.DismissedToEnd) {
 //                                        coroutineScope.launch { state.reset() }
 //                                    }
-                                                        Icon(
-                                                            Icons.Default.Refresh,
-                                                            contentDescription = null,
-                                                            tint = Color.White,
-                                                            modifier = Modifier
+                                                            Icon(
+                                                                Icons.Default.Refresh,
+                                                                contentDescription = null,
+                                                                tint = Color.White,
+                                                                modifier = Modifier
 
 
-                                                                .clickable { coroutineScope.launch { state.reset() } })
+                                                                    .clickable { coroutineScope.launch { state.reset() } })
+                                                        }
                                                     }
-                                                }
-                                            },
-                                            dismissContent = {
-                                                ItemList(item) {
-                                                    navController.navigate("infoNV/" + it.maNhanVien)
-                                                }
+                                                },
+                                                dismissContent = {
+                                                    ItemList(item) {
+                                                        navController.navigate("infoNV/" + it.maNhanVien)
+                                                    }
 
-                                            },
-                                            directions = setOf(DismissDirection.EndToStart)
-                                        )
-                                        Divider()
+                                                },
+                                                directions = setOf(DismissDirection.EndToStart)
+                                            )
+                                            Divider()
+                                        }
                                     }
-//                                }
+                            }
                         }
                     }
+
                 }
             }
             val t = createRef()
@@ -437,8 +467,8 @@ fun ThemNhanVienScreen(nhanVienViewModel: NhanVienViewModel) {
                     onClick = {
                         nhanVienViewModel.addOrUpdateNV(null) {
                             Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
-                         
-                                nhanVienViewModel.setData(NhanVien())
+
+                            nhanVienViewModel.setData(NhanVien())
 
                         }
 

@@ -96,8 +96,15 @@ class FireBaseDataHelper {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val list = mutableListOf<DonVi>()
                     for (data in snapshot.children) {
-                        val donvi = data.getValue(DonVi::class.java)
-                        donvi?.let { list.add(it) }
+                       try{
+                           val donvi = data.getValue(DonVi::class.java)
+                           if(donvi!=null){
+                               donvi?.let { list.add(it) }
+
+                           }
+                       }catch (e:Exception){
+                           Log.e("Firebase", "Lỗi khi chuyển đổi dữ liệu: ${e.message}")
+                       }
                     }
                     callBack(list, "Thành Công")
                 }
@@ -124,16 +131,18 @@ class FireBaseDataHelper {
     }
 
     fun updateDonVi(dv: DonVi, callBack: (s: String?) -> Unit) {
-        myRef.child("donvi").child(dv.maDonVi).setValue(dv).addOnCompleteListener {
-            if (it.isSuccessful) {
-                updateDonViCha(dv, callBack)
-                callBack("Cập nhật thành công đơn vị")
+        if(dv.maDonVi!=""){
+            myRef.child("donvi").child(dv.maDonVi).setValue(dv).addOnCompleteListener {
+                if (it.isSuccessful) {
+                    updateDonViCha(dv, callBack)
+                    callBack("Cập nhật thành công đơn vị")
 
-            } else {
-                callBack("Cập nhật đơn vị thất bại: ${it.exception?.message}")
+                } else {
+                    callBack("Cập nhật đơn vị thất bại: ${it.exception?.message}")
+                }
             }
+                .addOnFailureListener { callBack("Cập nhật đơn vị thất bại: ${it.message}") }
         }
-            .addOnFailureListener { callBack("Cập nhật đơn vị thất bại: ${it.message}") }
 
 
     }
