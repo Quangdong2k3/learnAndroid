@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -46,6 +45,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SwipeToDismiss
 import androidx.compose.material3.Text
@@ -78,7 +78,6 @@ import coil.compose.rememberAsyncImagePainter
 import com.tlu.ktraandroid.control.DonViViewModel
 import com.tlu.ktraandroid.control.NhanVienViewModel
 import com.tlu.ktraandroid.helper.FirebaseStorageHelper
-import com.tlu.ktraandroid.model.DonVi
 import com.tlu.ktraandroid.model.NhanVien
 import com.tlu.ktraandroid.model.listChucVus
 import com.tlu.ktraandroid.ui.theme.KtraAndroidTheme
@@ -106,7 +105,8 @@ fun NVScreen(navController: NavHostController, nhanVienViewModel: NhanVienViewMo
 
         val dsNV = nhanVienViewModel.dsNhanVien.collectAsState()
         LaunchedEffect(Unit) {
-            delay(4000) // Delay for 2 seconds
+            isLoading = true
+            delay(1000) // Delay for 2 seconds
             isLoading = false
         }
         ConstraintLayout {
@@ -115,7 +115,11 @@ fun NVScreen(navController: NavHostController, nhanVienViewModel: NhanVienViewMo
                 TextField(value = searchtxt.value,
                     onValueChange = {
                         searchtxt.value = it
-
+                        scope.launch {
+                            delay(100)
+                            nhanVienViewModel
+                                .searchNV(it)
+                        }
 
                     },
                     placeholder = {
@@ -129,7 +133,7 @@ fun NVScreen(navController: NavHostController, nhanVienViewModel: NhanVienViewMo
 
                             scope.launch {
                                 isLoading = true
-                                delay(3000)
+                                delay(1000)
                                 nhanVienViewModel
                                     .searchNV(searchtxt.value)
                                 isLoading = false
@@ -146,17 +150,23 @@ fun NVScreen(navController: NavHostController, nhanVienViewModel: NhanVienViewMo
 
 
                 // hiển thị danh sách
+                if (isLoading) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
 
-                Column(modifier = Modifier.padding(10.dp)) {
-                    Log.d("Xóa nhan vien: ", dsNV.value.size.toString())
-                    if (isLoading) {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator(0.9f)
-                        }
-                    } else {
+
+                        CircularProgressIndicator(
+                            0.1f,
+                            color = MaterialTheme.colorScheme.secondary,
+                            trackColor = MaterialTheme.colorScheme.surfaceVariant
+                        )
+
+                    }
+                } else {
+                    Column(modifier = Modifier.padding(10.dp)) {
+
                         if (dsNV.value.isNotEmpty()) {
 
                             LazyColumn {
@@ -245,10 +255,12 @@ fun NVScreen(navController: NavHostController, nhanVienViewModel: NhanVienViewMo
                                         }
                                     }
                             }
-                        }
-                    }
 
+                        }
+
+                    }
                 }
+
             }
             val t = createRef()
             Column(modifier = Modifier.constrainAs(t) {
@@ -265,7 +277,9 @@ fun NVScreen(navController: NavHostController, nhanVienViewModel: NhanVienViewMo
                     onDismissRequest = { showBottomSheet = false },
                     sheetState = sheetState
                 ) {
-                    ThemNhanVienScreen(nhanVienViewModel)
+                    ThemNhanVienScreen(nhanVienViewModel){
+                        showBottomSheet=it
+                    }
                 }
             }
         }
@@ -302,7 +316,7 @@ fun ItemList(n: NhanVien, onClick: (NhanVien) -> Unit) {
 
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
-fun ThemNhanVienScreen(nhanVienViewModel: NhanVienViewModel) {
+fun ThemNhanVienScreen(nhanVienViewModel: NhanVienViewModel,doneAction:(Boolean)->Unit) {
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
     val name by nhanVienViewModel.tenNV.collectAsState()
@@ -466,11 +480,13 @@ fun ThemNhanVienScreen(nhanVienViewModel: NhanVienViewModel) {
                 Button(
                     onClick = {
                         nhanVienViewModel.addOrUpdateNV(null) {
-                            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
 
                             nhanVienViewModel.setData(NhanVien())
+                            doneAction(false)
 
                         }
+                        Toast.makeText(context, "Thêm thành công", Toast.LENGTH_SHORT).show()
+
 
                     }, colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFF0E0ECF)
@@ -666,8 +682,10 @@ fun thongTinNVScreen(idNV: String?) {
             Button(
                 onClick = {
                     nhanVienViewModel.addOrUpdateNV(idNV) {
-                        Toast.makeText(context, "Sửa $it", Toast.LENGTH_SHORT).show()
+                        Log.d("Update NV: ",it)
                     }
+                    Toast.makeText(context, "Cập nhật thành công", Toast.LENGTH_SHORT).show()
+
 
                 }, colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFF3F51B5)

@@ -66,6 +66,7 @@ import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.tlu.ktraandroid.control.DonViViewModel
 import com.tlu.ktraandroid.model.DonVi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 //@SuppressLint("RestrictedApi")
@@ -115,7 +116,7 @@ fun thongTinDVScreen(navController: NavHostController? = null, idDonVi: String? 
                     Text(
                         text = "Tên đơn vị"
                     )
-                }, label = { Text(text = "Tên đơn vị")},
+                }, label = { Text(text = "Tên đơn vị") },
                 modifier = Modifier.fillMaxWidth()
             )
             TextField(
@@ -125,7 +126,7 @@ fun thongTinDVScreen(navController: NavHostController? = null, idDonVi: String? 
                     Text(
                         text = "Địa chỉ"
                     )
-                },label = {
+                }, label = {
                     Text(
                         text = "Địa chỉ"
                     )
@@ -139,7 +140,7 @@ fun thongTinDVScreen(navController: NavHostController? = null, idDonVi: String? 
                     Text(
                         text = "Email"
                     )
-                },label = {
+                }, label = {
                     Text(
                         text = "Email"
                     )
@@ -153,7 +154,7 @@ fun thongTinDVScreen(navController: NavHostController? = null, idDonVi: String? 
                     Text(
                         text = "Số điện thoại"
                     )
-                },label = {
+                }, label = {
                     Text(
                         text = "Số điện thoại"
                     )
@@ -168,7 +169,7 @@ fun thongTinDVScreen(navController: NavHostController? = null, idDonVi: String? 
                     Text(
                         text = "Logo"
                     )
-                },label = {
+                }, label = {
                     Text(
                         text = "Logo"
                     )
@@ -182,14 +183,14 @@ fun thongTinDVScreen(navController: NavHostController? = null, idDonVi: String? 
                     Text(
                         text = "link: //"
                     )
-                },label = {
+                }, label = {
                     Text(
                         text = "website"
                     )
                 },
                 modifier = Modifier.fillMaxWidth()
             )
-            if(tenDVC!=null&& tenDVC != ""){
+            if (tenDVC != null && tenDVC != "") {
                 TextField(
                     value = donViViewModel.tenDVC.value, onValueChange = {},
                     enabled = false,
@@ -197,7 +198,7 @@ fun thongTinDVScreen(navController: NavHostController? = null, idDonVi: String? 
                         Text(
                             text = ""
                         )
-                    },label = {
+                    }, label = {
                         Text(
                             text = "Tên đơn vị cha"
                         )
@@ -254,6 +255,7 @@ fun DefaultPreview() {
 }
 
 
+@SuppressLint("CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun DVScreen(donViViewModel: DonViViewModel, navController: NavHostController) {
@@ -266,14 +268,20 @@ fun DVScreen(donViViewModel: DonViViewModel, navController: NavHostController) {
         mutableStateOf("")
     }
 
+
     val listDonVi = donViViewModel.listDonVi.collectAsState()
-    ConstraintLayout {
+
+    ConstraintLayout() {
+
+
         Column(modifier = Modifier.fillMaxSize()) {
 
             TextField(value = searchtxt.value,
-                onValueChange = { searchtxt.value = it
+                onValueChange = {
+                    searchtxt.value = it
 
-                                donViViewModel.searchDV(it)},
+                    donViViewModel.searchDV(it)
+                },
                 placeholder = {
                     Text(
                         text = "Tìm kiếm tên đon vị"
@@ -284,13 +292,15 @@ fun DVScreen(donViViewModel: DonViViewModel, navController: NavHostController) {
                     Icon(
                         Icons.Default.Search, contentDescription = null
                     )
-                })
+                }
+            )
+
 
 
 
             Column(modifier = Modifier.padding(10.dp)) {
 //                val listDV01= listDonVi.value?.toMutableList()?: mutableListOf()
-                if(listDonVi.value.isNotEmpty()){
+                if (listDonVi.value.isNotEmpty()) {
                     LazyColumn {
                         itemsIndexed(
                             listDonVi.value
@@ -324,8 +334,9 @@ fun DVScreen(donViViewModel: DonViViewModel, navController: NavHostController) {
                                                 tint = Color.White,
                                                 modifier = Modifier
 
-                                                    .clickable {donViViewModel.deleteDV(item,context)
-                                                        })
+                                                    .clickable {
+                                                        donViViewModel.deleteDV(item, context)
+                                                    })
 //                                    if (state.targetValue == DismissValue.DismissedToEnd) {
 //                                        coroutineScope.launch { state.reset() }
 //                                    }
@@ -341,7 +352,7 @@ fun DVScreen(donViViewModel: DonViViewModel, navController: NavHostController) {
                                     }
                                 },
                                 dismissContent = {
-                                    ItemListDV(item?:DonVi()) {
+                                    ItemListDV(item ?: DonVi()) {
                                         navController.navigate("inFoDonVi/${item.maDonVi}")
                                     }
 
@@ -369,7 +380,9 @@ fun DVScreen(donViViewModel: DonViViewModel, navController: NavHostController) {
                 onDismissRequest = { showBottomSheet = false },
                 sheetState = sheetState
             ) {
-                ThemDonViScreen(donViViewModel)
+                ThemDonViScreen(donViViewModel){
+                    showBottomSheet=it
+                }
             }
         }
     }
@@ -379,7 +392,7 @@ fun DVScreen(donViViewModel: DonViViewModel, navController: NavHostController) {
 
 @Composable
 //@Preview(showSystemUi = true)
-fun ThemDonViScreen(donViViewModel: DonViViewModel = viewModel()) {
+fun ThemDonViScreen(donViViewModel: DonViViewModel = viewModel(),doneAction:(Boolean)->Unit) {
     val name by donViViewModel.ten.collectAsState()
     val context = LocalContext.current
     val diaChi by donViViewModel.diaChi.collectAsState()
@@ -475,6 +488,7 @@ fun ThemDonViScreen(donViViewModel: DonViViewModel = viewModel()) {
                             ), context
                         )
                         donvi.value = ""
+                        doneAction(false)
 
                     }, colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFF0E0ECF)
@@ -488,7 +502,6 @@ fun ThemDonViScreen(donViViewModel: DonViViewModel = viewModel()) {
     }
 
 }
-
 
 
 @Composable
@@ -516,4 +529,11 @@ fun ItemListDV(n: DonVi, onClick: (DonVi) -> Unit) {
             )
         })
 
+}
+
+suspend fun loadProgress(updateProgress: (Float) -> Unit) {
+    for (i in 1..100) {
+        updateProgress(i.toFloat() / 100)
+        delay(100)
+    }
 }

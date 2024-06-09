@@ -1,16 +1,12 @@
 package com.tlu.ktraandroid.helper
 
-import android.nfc.Tag
 import android.util.Log
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseException
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.FirebaseDatabaseKtxRegistrar
 import com.google.firebase.database.ValueEventListener
-import com.google.firebase.firestore.CollectionReference
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import com.tlu.ktraandroid.model.DonVi
@@ -209,7 +205,7 @@ class FireBaseDataHelper {
             myRef.child("donvicha").child(dv.maDonViCha).setValue(donViCha)
                 .addOnCompleteListener {
                     if (it.isSuccessful) {
-                        callBack("Cập nhật thành công đơn vị cha")
+                        Log.d("Update Cha","Cập nhật thành công đơn vị cha")
                     } else {
                         callBack("Cập nhật đơn vị cha thất bại: ${it.exception?.message}")
                     }
