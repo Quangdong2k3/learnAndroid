@@ -237,7 +237,7 @@ fun Header(height: Dp, image: String) {
                 model = image,
                 error = painterResource(id = R.drawable.ic_launcher_background)
             ),
-            contentScale = ContentScale.FillBounds,
+            contentScale = ContentScale.Inside,
             contentDescription = null,
             modifier = Modifier
                 .align(Alignment.Center)

@@ -104,6 +104,10 @@ fun NVScreen(navController: NavHostController, nhanVienViewModel: NhanVienViewMo
         val focuesManager = LocalFocusManager.current
 
         val dsNV = nhanVienViewModel.dsNhanVien.collectAsState()
+        val dv = nhanVienViewModel.donVi.collectAsState()
+        var expandFilter by remember{
+            mutableStateOf(false)
+        }
         LaunchedEffect(Unit) {
             isLoading = true
             delay(1000) // Delay for 2 seconds
@@ -118,7 +122,7 @@ fun NVScreen(navController: NavHostController, nhanVienViewModel: NhanVienViewMo
                         scope.launch {
                             delay(100)
                             nhanVienViewModel
-                                .searchNV(it)
+                                .searchNV(it,"")
                         }
 
                     },
@@ -135,7 +139,7 @@ fun NVScreen(navController: NavHostController, nhanVienViewModel: NhanVienViewMo
                                 isLoading = true
                                 delay(1000)
                                 nhanVienViewModel
-                                    .searchNV(searchtxt.value)
+                                    .searchNV(searchtxt.value,"")
                                 isLoading = false
                             }
                             focuesManager.clearFocus()
@@ -146,6 +150,19 @@ fun NVScreen(navController: NavHostController, nhanVienViewModel: NhanVienViewMo
                         Icon(
                             Icons.Default.Search, contentDescription = null
                         )
+                    }, trailingIcon = {
+
+                        Box(contentAlignment = Alignment.BottomEnd){
+                            Icon(painter = painterResource(id = R.drawable.sort), contentDescription =null,modifier=Modifier.clickable { expandFilter=true })
+                            DropdownMenu(expanded = expandFilter, onDismissRequest = { expandFilter!=expandFilter }) {
+                                nhanVienViewModel.lstdonVi.collectAsState().value.forEach {
+                                    DropdownMenuItem(text = { Text(text=it.ten) }, onClick = {
+                                        nhanVienViewModel.searchNV(searchtxt.value,it.maDonVi)
+                                        expandFilter=false
+                                    })
+                                }
+                            }
+                        }
                     })
 
 
@@ -364,7 +381,7 @@ fun ThemNhanVienScreen(nhanVienViewModel: NhanVienViewModel,doneAction:(Boolean)
                     .clip(
                         RoundedCornerShape(8.dp)
                     ),
-                contentScale = ContentScale.FillBounds,
+                contentScale = ContentScale.Inside,
 
                 )
             TextField(

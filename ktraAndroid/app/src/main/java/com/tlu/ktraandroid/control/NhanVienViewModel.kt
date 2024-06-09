@@ -1,7 +1,6 @@
 package com.tlu.ktraandroid.control
 
 import android.util.Log
-import androidx.compose.runtime.Composable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.database.DataSnapshot
@@ -10,7 +9,6 @@ import com.google.firebase.database.ValueEventListener
 import com.tlu.ktraandroid.helper.FireBaseDataHelper
 import com.tlu.ktraandroid.model.DonVi
 import com.tlu.ktraandroid.model.NhanVien
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -202,23 +200,32 @@ class NhanVienViewModel : ViewModel() {
         _dsNhanVien.value = l
     }
 
-    fun searchNV(s: String) {
-        if (!s.equals("")) {
-            nvRef.orderByChild("ten").startAt(s).endAt("${s}\uf8ff")
+    fun searchNV(s: String, idDV: String? = "") {
+//        dsNhanVien.value.toMutableList()
+//        Log.d("list filer1",list.toString())
 
+        if (s != "") {
+            nvRef.orderByChild("ten")
+//                .startAt(s).endAt("${s}\uf8ff")
                 .addValueEventListener(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
                         val list = mutableListOf<NhanVien>()
                         for (document in snapshot.children) {
                             val dv = document.getValue(NhanVien::class.java)
+                            Log.d("Seasrch ", dv?.ten!!.lowercase())
+                            Log.d(
+                                "Seasrch contains ",
+                                dv?.ten!!.lowercase().contains(s.lowercase()).toString()
+                            )
                             if (dv?.ten!!.lowercase().contains(s.lowercase())) {
                                 list.add(dv!!)
 
                             }
 
-                        }
-                        setDSNhanVien(list)
 
+                        }
+
+                        setDSNhanVien(list)
 
                     }
 
@@ -227,7 +234,42 @@ class NhanVienViewModel : ViewModel() {
                         setDSNhanVien(emptyList())
                     }
                 })
-        } else {
+
+
+        }else
+        if (idDV != "") {
+            db.getDonVi(idDV.toString()) { donVi: DonVi?, s: String? ->
+                try{
+                    if (donVi!!.nhanvien!!.size > 0) {
+                        setDSNhanVien(donVi!!.nhanvien!!)
+
+                    } else {
+                        setDSNhanVien(emptyList())
+
+                    }
+                }catch (e:Exception){Log.e("err",e.message.toString())}
+            }
+
+
+        }else
+        if (s != "" && idDV != "") {
+            db.getDonVi(idDV.toString()) { donVi: DonVi?, s: String? ->
+                try{
+                    if (donVi!=null) {
+
+                        val filter = donVi.nhanvien!!.filter {
+                            !it.ten.lowercase().contains(s!!.lowercase())
+                        }
+                        setDSNhanVien(filter)
+
+                    } else {
+                        setDSNhanVien(emptyList())
+
+                    }
+                }catch (e:Exception){Log.e("err",e.message.toString())}
+            }
+        }
+        else {
             getAllNV {
                 setDSNhanVien(it)
 
