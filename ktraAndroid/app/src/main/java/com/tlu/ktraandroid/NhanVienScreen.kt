@@ -153,8 +153,16 @@ fun NVScreen(navController: NavHostController, nhanVienViewModel: NhanVienViewMo
                     }, trailingIcon = {
 
                         Box(contentAlignment = Alignment.BottomEnd){
-                            Icon(painter = painterResource(id = R.drawable.sort), contentDescription =null,modifier=Modifier.clickable { expandFilter=true })
-                            DropdownMenu(expanded = expandFilter, onDismissRequest = { expandFilter!=expandFilter }) {
+                            Icon(painter = painterResource(id = R.drawable.sort), contentDescription =null,modifier=Modifier.clickable { expandFilter=true }.size(24.dp))
+                            DropdownMenu(expanded = expandFilter, onDismissRequest = { expandFilter=false }) {
+                                DropdownMenuItem(text = { Text(text="All") }, onClick = {
+                                    nhanVienViewModel.setData(NhanVien())
+                                    searchtxt.value=""
+                                    nhanVienViewModel.searchNV(searchtxt.value,"")
+                                    expandFilter=false
+
+                                })
+
                                 nhanVienViewModel.lstdonVi.collectAsState().value.forEach {
                                     DropdownMenuItem(text = { Text(text=it.ten) }, onClick = {
                                         nhanVienViewModel.searchNV(searchtxt.value,it.maDonVi)

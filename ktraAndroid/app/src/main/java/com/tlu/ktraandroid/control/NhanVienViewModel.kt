@@ -131,8 +131,7 @@ class NhanVienViewModel : ViewModel() {
             nvRef.child(key).setValue(
                 nhanvien
 
-            )
-                .addOnCompleteListener {
+            ).addOnCompleteListener {
                     if (it.isSuccessful) {
                         callBack("Add nhân viên thành công")
 
@@ -201,81 +200,69 @@ class NhanVienViewModel : ViewModel() {
     }
 
     fun searchNV(s: String, idDV: String? = "") {
-//        dsNhanVien.value.toMutableList()
-//        Log.d("list filer1",list.toString())
 
-        if (s != "") {
-            nvRef.orderByChild("ten")
-//                .startAt(s).endAt("${s}\uf8ff")
-                .addValueEventListener(object : ValueEventListener {
+        Log.e("err123", (s != "" && idDV != "").toString())
+
+        if (s.isNotEmpty() && idDV!!.isNotEmpty()) {
+            Log.e("Condition", "Both s and idDV are not empty")
+            db.getDonVi(idDV.toString()) { dv: DonVi?, mess: String? ->
+                try {
+                    if (dv != null) {
+                        val filter = dv.nhanvien?.filter {
+                            it.ten.lowercase().contains(s.lowercase())
+                        } ?: emptyList()
+                        setDSNhanVien(filter)
+                    } else {
+                        setDSNhanVien(emptyList())
+                    }
+                } catch (e: Exception) {
+                    Log.e("err", e.message.toString())
+                }
+            }
+        } else if (s.isNotEmpty()) {
+            Log.e("Condition", "Only s is not empty")
+            nvRef.orderByChild("ten").addValueEventListener(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
                         val list = mutableListOf<NhanVien>()
                         for (document in snapshot.children) {
                             val dv = document.getValue(NhanVien::class.java)
-                            Log.d("Seasrch ", dv?.ten!!.lowercase())
+                            Log.d("Search ", dv?.ten?.lowercase() ?: "")
                             Log.d(
-                                "Seasrch contains ",
-                                dv?.ten!!.lowercase().contains(s.lowercase()).toString()
+                                "Search contains ",
+                                dv?.ten?.lowercase()?.contains(s.lowercase()).toString()
                             )
-                            if (dv?.ten!!.lowercase().contains(s.lowercase())) {
-                                list.add(dv!!)
-
+                            if (dv?.ten?.lowercase()?.contains(s.lowercase()) == true) {
+                                list.add(dv)
                             }
-
-
                         }
-
                         setDSNhanVien(list)
-
                     }
 
                     override fun onCancelled(error: DatabaseError) {
-                        TODO()
+                        Log.e("DatabaseError", error.message)
                         setDSNhanVien(emptyList())
                     }
                 })
-
-
-        }else
-        if (idDV != "") {
-            db.getDonVi(idDV.toString()) { donVi: DonVi?, s: String? ->
-                try{
-                    if (donVi!!.nhanvien!!.size > 0) {
-                        setDSNhanVien(donVi!!.nhanvien!!)
-
+        } else if (idDV!!.isNotEmpty()) {
+            Log.e("Condition", "Only idDV is not empty")
+            db.getDonVi(idDV.toString()) { dv: DonVi?, s: String? ->
+                try {
+                    if (dv?.nhanvien?.isNotEmpty() == true) {
+                        setDSNhanVien(dv.nhanvien!!)
                     } else {
                         setDSNhanVien(emptyList())
-
                     }
-                }catch (e:Exception){Log.e("err",e.message.toString())}
+                } catch (e: Exception) {
+                    Log.e("err", e.message.toString())
+                }
             }
-
-
-        }else
-        if (s != "" && idDV != "") {
-            db.getDonVi(idDV.toString()) { donVi: DonVi?, s: String? ->
-                try{
-                    if (donVi!=null) {
-
-                        val filter = donVi.nhanvien!!.filter {
-                            !it.ten.lowercase().contains(s!!.lowercase())
-                        }
-                        setDSNhanVien(filter)
-
-                    } else {
-                        setDSNhanVien(emptyList())
-
-                    }
-                }catch (e:Exception){Log.e("err",e.message.toString())}
-            }
-        }
-        else {
+        } else {
+            Log.e("Condition", "Both s and idDV are empty")
             getAllNV {
                 setDSNhanVien(it)
-
-
             }
         }
+
     }
 
     fun deleteNV(nv: NhanVien, callBack: (s: String) -> Unit) {
@@ -293,8 +280,7 @@ class NhanVienViewModel : ViewModel() {
                     } else {
                         callBack("Xóa failed ${it.exception?.message}")
                     }
-                }
-                .addOnFailureListener { callBack("Xóa thất bại ${it.message}") }
+                }.addOnFailureListener { callBack("Xóa thất bại ${it.message}") }
         }
     }
 
@@ -316,16 +302,14 @@ class NhanVienViewModel : ViewModel() {
                     donVi.nhanvien?.filter { it.maNhanVien != nv.maNhanVien }?.toMutableList()!!
 
                 // Lưu đơn vị cha đã cập nhật trở lại Firebase
-                db.getDVRef().child(nv.maDonVi.maDonVi).setValue(donVi)
-                    .addOnCompleteListener {
+                db.getDVRef().child(nv.maDonVi.maDonVi).setValue(donVi).addOnCompleteListener {
                         if (it.isSuccessful) {
                             db.updateDonViCha(donVi) {}
                             callBack("Cập nhật thành công đơn vị cha sau khi xóa đơn vị con")
                         } else {
                             callBack("Cập nhật đơn vị cha thất bại: ${it.exception?.message}")
                         }
-                    }
-                    .addOnFailureListener { e ->
+                    }.addOnFailureListener { e ->
                         callBack("Cập nhật đơn vị cha thất bại: ${e.message}")
                     }
             }
